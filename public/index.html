@@ -1,97 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WhatsApp Number Checker (FREE)</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div class="container">
-    <header>
-      <h1>📱 WhatsApp Number Checker</h1>
-      <p>Verify if phone numbers are registered on WhatsApp - <strong>100% FREE</strong></p>
-    </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WhatsApp Number Checker (FREE)</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>📱 WhatsApp Number Checker</h1>
+        <p>
+          Verify if phone numbers are registered on WhatsApp -
+          <strong>100% FREE</strong>
+        </p>
+      </header>
 
-    <main>
-      <!-- Connection Section -->
-      <div class="connection-section" id="connectionSection">
-        <div class="connection-status" id="connectionStatus">
-          <span class="status-dot disconnected"></span>
-          <span class="status-text">Not Connected</span>
-        </div>
-        
-        <div class="qr-container" id="qrContainer" style="display: none;">
-          <p>Scan this QR code with your WhatsApp:</p>
-          <img id="qrCode" src="" alt="QR Code">
-          <small>Open WhatsApp → Settings → Linked Devices → Link a Device</small>
+      <main>
+        <!-- Connection Section -->
+        <div class="connection-section" id="connectionSection">
+          <div class="connection-status" id="connectionStatus">
+            <span class="status-dot disconnected"></span>
+            <span class="status-text">Not Connected</span>
+          </div>
+
+          <div class="qr-container" id="qrContainer" style="display: none">
+            <p>Scan this QR code with your WhatsApp:</p>
+            <img id="qrCode" src="" alt="QR Code" />
+            <small
+              >Open WhatsApp → Settings → Linked Devices → Link a Device</small
+            >
+          </div>
+
+          <div class="connection-buttons">
+            <button id="connectBtn" class="btn-connect">
+              🔗 Connect WhatsApp
+            </button>
+            <button
+              id="disconnectBtn"
+              class="btn-disconnect"
+              style="display: none"
+            >
+              ❌ Disconnect
+            </button>
+          </div>
         </div>
 
-        <div class="connection-buttons">
-          <button id="connectBtn" class="btn-connect">🔗 Connect WhatsApp</button>
-          <button id="disconnectBtn" class="btn-disconnect" style="display: none;">❌ Disconnect</button>
-        </div>
-      </div>
-
-      <div class="input-section" id="inputSection">
-        <div class="form-group">
-          <label for="phoneNumbers">Phone Numbers (one per line)</label>
-          <textarea 
-            id="phoneNumbers" 
-            rows="10" 
-            placeholder="Enter phone numbers with country code, one per line:
+        <div class="input-section" id="inputSection">
+          <div class="form-group">
+            <label for="phoneNumbers">Phone Numbers (one per line)</label>
+            <textarea
+              id="phoneNumbers"
+              rows="10"
+              placeholder="Enter phone numbers with country code, one per line:
 1234567890
 14155552671
 447911123456
 
 (With or without + sign)"
-          ></textarea>
-          <small>Enter phone numbers with country code (e.g., 1234567890 for US)</small>
-        </div>
-
-        <div class="form-group file-upload">
-          <label>Or upload a CSV file</label>
-          <div class="file-input-wrapper">
-            <input type="file" id="csvFile" accept=".csv" />
-            <label for="csvFile" class="file-label">
-              <span class="file-icon">📄</span>
-              <span class="file-text">Choose CSV file...</span>
-            </label>
-            <span class="file-name" id="fileName"></span>
+            ></textarea>
+            <small
+              >Enter phone numbers with country code (e.g., 1234567890 for
+              US)</small
+            >
           </div>
-          <small>CSV should have a column with phone numbers (named: phone, number, phoneNumber, or first column)</small>
-        </div>
 
-        <button id="verifyBtn" class="btn-primary" disabled>
-          <span class="btn-text">🔍 Verify Numbers</span>
-          <span class="btn-loading" style="display: none;">⏳ Checking...</span>
-        </button>
-      </div>
-
-      <div class="results-section" id="resultsSection" style="display: none;">
-        <div class="stats" id="stats"></div>
-        <div class="results-container">
-          <h2>Results</h2>
-          <div class="filter-buttons">
-            <button class="filter-btn active" data-filter="all">All</button>
-            <button class="filter-btn" data-filter="valid">✓ Valid</button>
-            <button class="filter-btn" data-filter="invalid">✗ Invalid</button>
+          <div class="form-group file-upload">
+            <label>Or upload a CSV file</label>
+            <div class="file-input-wrapper">
+              <input type="file" id="csvFile" accept=".csv" />
+              <label for="csvFile" class="file-label">
+                <span class="file-icon">📄</span>
+                <span class="file-text">Choose CSV file...</span>
+              </label>
+              <span class="file-name" id="fileName"></span>
+            </div>
+            <small
+              >CSV should have a column with phone numbers (named: phone,
+              number, phoneNumber, or first column)</small
+            >
           </div>
-          <div class="results-list" id="resultsList"></div>
-          <button id="exportBtn" class="btn-secondary">📥 Export as JSON</button>
-          <button id="exportCsvBtn" class="btn-secondary">📥 Export as CSV</button>
+
+          <button id="verifyBtn" class="btn-primary" disabled>
+            <span class="btn-text">🔍 Verify Numbers</span>
+            <span class="btn-loading" style="display: none"
+              >⏳ Checking...</span
+            >
+          </button>
         </div>
-      </div>
 
-      <div class="error-message" id="errorMessage" style="display: none;"></div>
-    </main>
+        <div class="results-section" id="resultsSection" style="display: none">
+          <div class="stats" id="stats"></div>
+          <div class="results-container">
+            <h2>Results</h2>
+            <div class="filter-buttons">
+              <button class="filter-btn active" data-filter="all">All</button>
+              <button class="filter-btn" data-filter="valid">✓ Valid</button>
+              <button class="filter-btn" data-filter="invalid">
+                ✗ Invalid
+              </button>
+            </div>
+            <div class="results-list" id="resultsList"></div>
+            <button id="exportBtn" class="btn-secondary">
+              📥 Export as JSON
+            </button>
+            <button id="exportCsvBtn" class="btn-secondary">
+              📥 Export as CSV
+            </button>
+          </div>
+        </div>
 
-    <footer>
-      <p>Free & Open Source - Uses <a href="https://github.com/WhiskeySockets/Baileys" target="_blank">Baileys</a> (WhatsApp Web API)</p>
-      <p><small>⚠️ Your WhatsApp session is stored locally. Use responsibly.</small></p>
-    </footer>
-  </div>
+        <div
+          class="error-message"
+          id="errorMessage"
+          style="display: none"
+        ></div>
+      </main>
 
-  <script src="app.js"></script>
-</body>
+      <footer>
+        <p>
+          Free & Open Source - Uses
+          <a href="https://github.com/WhiskeySockets/Baileys" target="_blank"
+            >Baileys</a
+          >
+          (WhatsApp Web API)
+        </p>
+        <p>
+          <small
+            >⚠️ Your WhatsApp session is stored locally. Use responsibly.</small
+          >
+        </p>
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
 </html>

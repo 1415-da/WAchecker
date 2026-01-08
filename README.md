@@ -24,11 +24,13 @@ This app connects to WhatsApp Web using your own WhatsApp account (just like the
 ## Installation
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
 
 2. Start the server:
+
    ```bash
    npm start
    ```
@@ -40,7 +42,7 @@ This app connects to WhatsApp Web using your own WhatsApp account (just like the
 
 ## Usage
 
-1. Click **Connect WhatsApp** 
+1. Click **Connect WhatsApp**
 2. Scan the QR code with your WhatsApp:
    - Open WhatsApp on your phone
    - Go to Settings → Linked Devices → Link a Device
@@ -58,6 +60,7 @@ This app connects to WhatsApp Web using your own WhatsApp account (just like the
 ## Development
 
 Run with auto-reload:
+
 ```bash
 npm run dev
 ```
@@ -65,6 +68,7 @@ npm run dev
 ## Important Notes
 
 ⚠️ **Use Responsibly:**
+
 - Your WhatsApp session is stored locally in the `auth_info` folder
 - Don't use this for spamming or malicious purposes
 - WhatsApp may restrict accounts that make too many verification requests
