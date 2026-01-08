@@ -9,6 +9,8 @@
     "backend:watch": "node --watch server.js",
     "dev": "concurrently -k \"vite\" \"wait-on http://127.0.0.1:5173 && electron .\"",
     "build": "vite build",
+    "package": "npm run build && electron-forge package",
+    "make": "npm run build && electron-forge make",
     "start": "electron .",
     "preview": "vite preview"
   },
@@ -30,6 +32,11 @@
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
+    "@electron-forge/cli": "^7.8.0",
+    "@electron-forge/maker-deb": "^7.8.0",
+    "@electron-forge/maker-rpm": "^7.8.0",
+    "@electron-forge/maker-squirrel": "^7.8.0",
+    "@electron-forge/maker-zip": "^7.8.0",
     "@types/node": "^22.10.6",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
@@ -49,5 +56,8 @@
     "bulk",
     "free"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "config": {
+    "forge": "./forge.config.cjs"
+  }
 }
