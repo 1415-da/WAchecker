@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Palette (from provided guidelines)
+		   Forest Green: #1A3326
+		   Electric Lime: #D4F65E
+		   Charcoal: #121212
+		   Slate Grey: #757575
+		   Soft Grey: #E0E0E0
+		   Pure White: #FFFFFF
+		   Off-white mint gradient: #F4F6F4 → #EAE9E1
+		*/
+    --radius: 0.9rem;
+
+    --background: 90 14% 95%;
+    --foreground: 0 0% 7%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 7%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 7%;
+
+    --primary: 151 32% 15%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 97%;
+    --secondary-foreground: 0 0% 7%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 46%;
+
+    --accent: 71 90% 67%;
+    --accent-foreground: 151 32% 15%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 151 32% 15%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: "Manrope", ui-sans-serif, system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+      "Noto Sans", "Liberation Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: "Anek Latin", ui-sans-serif, system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+      "Noto Sans", "Liberation Sans", sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Subtle mint surface (like the reference screens) */
+.app-surface {
+  background: linear-gradient(180deg, #f4f6f4 0%, #eae9e1 100%);
+}
+
+.card-shadow {
+  box-shadow: 0 10px 30px rgba(18, 18, 18, 0.08),
+    0 2px 8px rgba(18, 18, 18, 0.05);
+}

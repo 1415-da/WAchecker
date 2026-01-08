@@ -2,17 +2,46 @@
   "name": "whatsapp-number-checker",
   "version": "1.0.0",
   "description": "Web app to verify WhatsApp numbers in bulk (FREE - uses Baileys)",
-  "main": "server.js",
+  "main": "electron/main.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "backend": "node server.js",
+    "backend:watch": "node --watch server.js",
+    "dev": "concurrently -k \"vite\" \"wait-on http://127.0.0.1:5173 && electron .\"",
+    "build": "vite build",
+    "start": "electron .",
+    "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/anek-latin": "^5.2.7",
+    "@fontsource/manrope": "^5.2.8",
+    "@radix-ui/react-progress": "^1.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
     "@whiskeysockets/baileys": "^6.7.16",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "express": "^4.18.2",
+    "framer-motion": "^12.24.12",
+    "phosphor-react": "^1.4.1",
+    "pino": "^8.16.2",
     "qrcode": "^1.5.3",
-    "pino": "^8.16.2"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "tailwind-merge": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.6",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.1.0",
+    "electron": "^31.6.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3",
+    "vite": "^5.4.11",
+    "wait-on": "^7.2.0"
   },
   "keywords": [
     "whatsapp",

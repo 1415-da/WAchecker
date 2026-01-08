@@ -9,6 +9,7 @@ import makeWASocket, {
 } from "@whiskeysockets/baileys";
 import pino from "pino";
 import QRCode from "qrcode";
+import fs from "node:fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,20 +27,59 @@ let qrCode = null;
 let connectionStatus = "disconnected"; // disconnected, connecting, connected
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 3;
+let isConnecting = false;
+const AUTH_DIR = path.join(__dirname, "auth_info");
 
 // Logger
 const logger = pino({ level: "silent" });
 
+function clearAuthFolder() {
+  try {
+    if (fs.existsSync(AUTH_DIR)) {
+      fs.rmSync(AUTH_DIR, { recursive: true, force: true });
+    }
+  } catch (err) {
+    // Non-fatal. If we can't clear, Baileys may keep failing to auth; caller will see it.
+    console.error("Failed to clear auth_info:", err);
+  }
+}
+
+async function teardownSocket() {
+  try {
+    if (!sock) return;
+    try {
+      // Best-effort close; can throw if already closed.
+      sock.end?.();
+    } catch {
+      // ignore
+    }
+    try {
+      // Remove listeners so a stale socket can't mutate globals.
+      sock.ev.removeAllListeners();
+    } catch {
+      // ignore
+    }
+  } finally {
+    sock = null;
+  }
+}
+
 // Initialize WhatsApp connection
 async function connectToWhatsApp() {
   try {
+    if (isConnecting) return;
+    isConnecting = true;
+
+    // Ensure we don't have a stale socket hanging around (e.g. after loggedOut)
+    await teardownSocket();
+
     // Fetch latest version to avoid 405 errors
     const { version, isLatest } = await fetchLatestBaileysVersion();
     console.log(
       `Using WA version: ${version.join(".")}, isLatest: ${isLatest}`
     );
 
-    const { state, saveCreds } = await useMultiFileAuthState("auth_info");
+    const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
 
     connectionStatus = "connecting";
     qrCode = null;
@@ -85,7 +125,8 @@ async function connectToWhatsApp() {
         );
         connectionStatus = "disconnected";
         qrCode = null;
-        sock = null;
+        await teardownSocket();
+        isConnecting = false;
 
         if (shouldReconnect) {
           reconnectAttempts++;
@@ -100,6 +141,8 @@ async function connectToWhatsApp() {
           console.log(
             "Logged out. Please click Connect again to get a new QR code."
           );
+          // Force a clean re-auth next time.
+          clearAuthFolder();
           reconnectAttempts = 0;
         }
       } else if (connection === "open") {
@@ -107,12 +150,16 @@ async function connectToWhatsApp() {
         connectionStatus = "connected";
         qrCode = null;
         reconnectAttempts = 0;
+        isConnecting = false;
       }
     });
   } catch (error) {
     console.error("Connection error:", error);
     connectionStatus = "disconnected";
     qrCode = null;
+    await teardownSocket();
+  } finally {
+    isConnecting = false;
   }
 }
 
@@ -132,6 +179,10 @@ app.post("/api/connect", async (req, res) => {
       return res.json({ success: true, message: "Already connected" });
     }
 
+    if (isConnecting || connectionStatus === "connecting") {
+      return res.json({ success: true, message: "Already connecting..." });
+    }
+
     await connectToWhatsApp();
     res.json({ success: true, message: "Connecting... Please scan QR code" });
   } catch (error) {
@@ -144,7 +195,7 @@ app.post("/api/disconnect", async (req, res) => {
   try {
     if (sock) {
       await sock.logout();
-      sock = null;
+      await teardownSocket();
     }
     connectionStatus = "disconnected";
     qrCode = null;

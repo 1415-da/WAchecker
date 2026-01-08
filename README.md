@@ -1,6 +1,6 @@
-# WhatsApp Number Checker (FREE)
+# WhatsApp Number Checker (Local Electron App)
 
-A **100% FREE** web application to verify WhatsApp numbers in bulk using the open-source [Baileys](https://github.com/WhiskeySockets/Baileys) library.
+A **local desktop app** (Electron) to verify WhatsApp numbers in bulk using the open-source [Baileys](https://github.com/WhiskeySockets/Baileys) library.
 
 ## Features
 
@@ -11,6 +11,14 @@ A **100% FREE** web application to verify WhatsApp numbers in bulk using the ope
 - 📥 Export results as JSON
 - 📱 Connect via QR code (like WhatsApp Web)
 - 📱 Responsive design
+
+## Tech stack
+
+- Electron (main process in `electron/main.js`)
+- React + Vite (renderer)
+- Tailwind CSS
+- shadcn/ui components
+- Express + Baileys backend (still in `server.js`, runs locally on port `3000`)
 
 ## How It Works
 
@@ -29,16 +37,35 @@ This app connects to WhatsApp Web using your own WhatsApp account (just like the
    npm install
    ```
 
-2. Start the server:
+## Run (desktop)
 
-   ```bash
-   npm start
-   ```
+### Development
 
-3. Open your browser and navigate to:
-   ```
-   http://localhost:3000
-   ```
+This starts the Vite dev server and launches Electron pointing at it.
+
+```bash
+npm run dev
+```
+
+### Production build
+
+Build the React renderer:
+
+```bash
+npm run build
+```
+
+Then run Electron loading the built files:
+
+```bash
+npm start
+```
+
+## Backend notes
+
+- The backend is your existing Express server in `server.js`.
+- The Electron main process starts it automatically (port `3000`) and the React UI calls `http://127.0.0.1:3000/api/*`.
+- Your WhatsApp auth/session is stored locally in `auth_info/`.
 
 ## Usage
 
@@ -59,10 +86,16 @@ This app connects to WhatsApp Web using your own WhatsApp account (just like the
 
 ## Development
 
-Run with auto-reload:
+If you want to run only the backend:
 
 ```bash
-npm run dev
+npm run backend
+```
+
+Watch mode backend-only:
+
+```bash
+npm run backend:watch
 ```
 
 ## Important Notes
