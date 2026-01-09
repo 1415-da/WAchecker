@@ -10,8 +10,19 @@
 
 module.exports = {
   packagerConfig: {
-    // You can set icon later, e.g. "assets/icon" (without extension)
-    // icon: "assets/icon",
+    // App icon (without extension - Electron Packager adds .ico on Windows)
+    icon: "assets/icon",
+    asar: true,
+    // Ignore files/folders that shouldn't be packaged
+    ignore: [
+      /^\/src$/,
+      /^\/public$/,
+      /^\/scripts$/,
+      /^\/\.git$/,
+      /^\/\.vscode$/,
+      /^\/node_modules\/\.cache/,
+      /\.map$/,
+    ],
   },
   rebuildConfig: {},
   makers: [
@@ -20,11 +31,18 @@ module.exports = {
       config: {
         // Used in the installer metadata
         name: "WAchecker",
+        authors: "pro-khar",
+        description: "WhatsApp Number Validator",
+        // Icon for the installer and installed app
+        iconUrl: "https://raw.githubusercontent.com/pro-khar/WAchecker/main/assets/icon.ico",
+        setupIcon: "assets/icon.ico",
       },
     },
     {
       name: "@electron-forge/maker-zip",
-      platforms: ["win32", "darwin", "linux"],
+      // NOTE: Disabled for Windows because the current zip maker dependency
+      // (cross-zip@4.0.1) is not compatible with newer Node.js versions.
+      platforms: ["darwin", "linux"],
     },
     {
       name: "@electron-forge/maker-deb",

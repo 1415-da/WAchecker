@@ -1,38 +1,75 @@
-import { app, BrowserWindow, Menu } from "electron";
+import { app, BrowserWindow, Menu, dialog } from "electron";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { spawn } from "node:child_process";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import fs from "node:fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const isDev = process.env.VITE_DEV_SERVER_URL != null;
 
-/** @type {import('node:child_process').ChildProcessWithoutNullStreams | null} */
-let backend = null;
+// Log errors to help debug packaged app crashes
+process.on("uncaughtException", (error) => {
+  const logPath = path.join(app.getPath("userData"), "crash.log");
+  fs.appendFileSync(logPath, `[${new Date().toISOString()}] Uncaught Exception:\n${error.stack}\n\n`);
+  dialog.showErrorBox("Application Error", `An error occurred:\n${error.message}\n\nLog saved to: ${logPath}`);
+});
 
-function startBackend() {
-  if (backend) return;
+process.on("unhandledRejection", (reason) => {
+  const logPath = path.join(app.getPath("userData"), "crash.log");
+  fs.appendFileSync(logPath, `[${new Date().toISOString()}] Unhandled Rejection:\n${reason}\n\n`);
+});
 
-  // In dev: run your existing Express server with node
-  // In prod: we still run the same JS file from the app resources.
-  const serverEntry = path.join(__dirname, "..", "server.js");
+/** @type {BrowserWindow | null} */
+let mainWindow = null;
 
-  backend = spawn(process.execPath, [serverEntry], {
-    env: {
-      ...process.env,
-      PORT: process.env.PORT ?? "3000",
-    },
-    stdio: "inherit",
-  });
+let backendStarted = false;
 
-  backend.on("exit", () => {
-    backend = null;
-  });
+function handleSquirrelEvent() {
+  // During install/update/uninstall, Squirrel may invoke the app with special args.
+  // If we don't quit immediately, the installer can trigger multiple unwanted launches.
+  if (process.platform !== "win32") return false;
+  return process.argv.some((arg) => arg?.startsWith?.("--squirrel"));
+}
+
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+if (!gotSingleInstanceLock) {
+  app.quit();
+}
+
+async function startBackend() {
+  if (backendStarted) return;
+  backendStarted = true;
+
+  // IMPORTANT:
+  // In a packaged app, `process.execPath` points to your app's .exe.
+  // Spawning it to run `server.js` can recursively launch more app instances.
+  // Instead, start the backend in-process by importing the module.
+  
+  // In packaged app, resources are in app.asar, so we need to handle paths correctly
+  let serverEntry;
+  if (app.isPackaged) {
+    // When packaged, __dirname is inside app.asar
+    serverEntry = path.join(__dirname, "..", "server.js");
+  } else {
+    serverEntry = path.join(__dirname, "..", "server.js");
+  }
+
+  console.log("Starting backend from:", serverEntry);
+  
+  try {
+    await import(pathToFileURL(serverEntry).href);
+    console.log("Backend started successfully");
+  } catch (error) {
+    console.error("Failed to start backend:", error);
+    const logPath = path.join(app.getPath("userData"), "crash.log");
+    fs.appendFileSync(logPath, `[${new Date().toISOString()}] Backend Error:\n${error.stack}\n\n`);
+    dialog.showErrorBox("Backend Error", `Failed to start server:\n${error.message}`);
+  }
 }
 
 function createWindow() {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1100,
     height: 900,
     webPreferences: {
@@ -41,17 +78,35 @@ function createWindow() {
   });
 
   if (isDev) {
-    win.loadURL(process.env.VITE_DEV_SERVER_URL);
-    win.webContents.openDevTools({ mode: "detach" });
+    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
+    mainWindow.webContents.openDevTools({ mode: "detach" });
   } else {
-    win.loadFile(path.join(__dirname, "..", "dist", "index.html"));
+    mainWindow.loadFile(path.join(__dirname, "..", "dist", "index.html"));
   }
+
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+  });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  if (handleSquirrelEvent()) {
+    app.quit();
+    return;
+  }
+
   Menu.setApplicationMenu(null);
-  startBackend();
+  await startBackend();
   createWindow();
+
+  app.on("second-instance", () => {
+    if (!mainWindow) {
+      createWindow();
+      return;
+    }
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  });
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -59,11 +114,6 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => {
-  if (backend) {
-    backend.kill();
-    backend = null;
-  }
-
   if (process.platform !== "darwin") {
     app.quit();
   }

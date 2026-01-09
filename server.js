@@ -10,6 +10,7 @@ import makeWASocket, {
 import pino from "pino";
 import QRCode from "qrcode";
 import fs from "node:fs";
+import os from "node:os";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,7 +29,27 @@ let connectionStatus = "disconnected"; // disconnected, connecting, connected
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 3;
 let isConnecting = false;
-const AUTH_DIR = path.join(__dirname, "auth_info");
+
+// Use app data folder for auth in production (when packaged in asar), local folder in development
+function getAuthDir() {
+  // Check if we're running from inside an asar archive (packaged Electron app)
+  const isPackaged = __dirname.includes("app.asar");
+  
+  if (isPackaged) {
+    // Use user's app data folder for writable storage
+    const appDataPath = process.env.APPDATA || 
+      (process.platform === "darwin" 
+        ? path.join(os.homedir(), "Library", "Application Support")
+        : path.join(os.homedir(), ".config"));
+    return path.join(appDataPath, "whatsapp-number-checker", "auth_info");
+  }
+  
+  // Development: use local folder
+  return path.join(__dirname, "auth_info");
+}
+
+const AUTH_DIR = getAuthDir();
+console.log("Auth directory:", AUTH_DIR);
 
 // Logger
 const logger = pino({ level: "silent" });
