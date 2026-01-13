@@ -34,6 +34,7 @@ type VerifyResultItem = {
   exists: boolean;
   jid: string | null;
   error?: string;
+  country?: string;
 };
 
 type VerifyResponse = {
@@ -79,14 +80,15 @@ function downloadTextFile(filename: string, content: string, mime: string) {
 }
 
 function toCsv(
-  rows: Array<{ phone: string; exists: boolean; error?: string }>
+  rows: Array<{ phone: string; exists: boolean; error?: string; country?: string }>
 ) {
-  const header = "phone,exists,error";
+  const header = "phone,exists,country,error";
   const lines = rows.map((r) => {
     const phone = JSON.stringify(r.phone ?? "");
     const exists = r.exists ? "true" : "false";
+    const country = JSON.stringify(r.country ?? "");
     const error = JSON.stringify(r.error ?? "");
-    return `${phone},${exists},${error}`;
+    return `${phone},${exists},${country},${error}`;
   });
   return [header, ...lines].join("\n");
 }
@@ -649,8 +651,15 @@ export default function App() {
                                         animate={{ opacity: 1, y: 0 }}
                                         className="flex items-center justify-between rounded-lg border border-[#E0E0E0] bg-white px-3 py-2"
                                       >
-                                        <div className="font-mono text-sm text-[#121212]">
-                                          {r.phone}
+                                        <div>
+                                          <div className="font-mono text-sm text-[#121212]">
+                                            {r.phone}
+                                          </div>
+                                          {r.country && (
+                                            <div className="mt-0.5 text-xs text-[#757575]">
+                                              {r.country}
+                                            </div>
+                                          )}
                                         </div>
                                         <div
                                           className="flex items-center gap-1 text-xs font-semibold"
@@ -720,11 +729,18 @@ export default function App() {
                                           <div className="font-mono text-sm text-[#121212]">
                                             {r.phone}
                                           </div>
-                                          {r.error ? (
-                                            <div className="mt-0.5 text-xs text-[#757575]">
-                                              {r.error}
-                                            </div>
-                                          ) : null}
+                                          <div className="mt-0.5 flex flex-col gap-0.5">
+                                            {r.country && (
+                                              <div className="text-xs text-[#757575]">
+                                                {r.country}
+                                              </div>
+                                            )}
+                                            {r.error && (
+                                              <div className="text-xs text-rose-600">
+                                                {r.error}
+                                              </div>
+                                            )}
+                                          </div>
                                         </div>
                                         <div className="text-rose-600">
                                           <XCircle size={18} weight="fill" />
