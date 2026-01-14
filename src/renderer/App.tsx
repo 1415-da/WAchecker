@@ -287,7 +287,12 @@ export default function App() {
     const payload =
       kind === "all" ? results : kind === "valid" ? valid : invalid;
     const csv = toCsv(
-      payload.map((r) => ({ phone: r.phone, exists: r.exists, error: r.error }))
+      payload.map((r) => ({
+        phone: r.phone,
+        exists: r.exists,
+        country: r.country,
+        error: r.error,
+      }))
     );
     downloadTextFile(`wa-checker-${kind}.csv`, csv, "text/csv");
   }
